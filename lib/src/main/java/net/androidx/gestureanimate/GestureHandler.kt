@@ -110,7 +110,15 @@ class GestureHandler constructor(
                 lastTouchY = y
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                pos = velocityTracker?.getXVelocity() ?: 0f
+                pos = velocityTracker?.xVelocity ?: 0f
+                change = listener.getProgress()
+                val velocityToMove = pos / listener.getMovementDistance()
+                if (!velocityToMove.isNaN()) {
+                    change += velocityToMove / 3f
+                }
+                if (change != 0f && change != 1f) {
+                    listener.onAnimateToProgress(if (change < 0.5f) 0f else 1f)
+                }
 
                 activePointerId = MotionEvent.INVALID_POINTER_ID
                 // Return a VelocityTracker object back to be re-used by others.
@@ -150,5 +158,7 @@ interface ScrollListener {
     fun getMovementDistance(): Float
 
     fun onProgressChange(progress: Float)
+
+    fun onAnimateToProgress(value: Float)
 }
 

@@ -39,6 +39,14 @@ class SwipeMotionLayout @JvmOverloads constructor(
             log.debug("onProgressChange $progress")
             progress = value
         }
+
+        override fun onAnimateToProgress(value: Float) {
+            if (value == 0f) {
+                transitionToStart()
+            } else {
+                transitionToEnd()
+            }
+        }
     }
     private val swipeGestureHandler = GestureHandler(context, listener)
 
