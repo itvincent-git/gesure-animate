@@ -6,14 +6,16 @@ import android.view.VelocityTracker
 import android.view.ViewConfiguration
 import net.slog.SLoggerFactory
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * 提供滑动事件的处理能力
  * Created by zhongyongsheng on 2019-11-20.
  */
-class SwipeGestureHandler constructor(
+class GestureHandler constructor(
     private val context: Context,
-    private val swipeListener: ScrollListener?
+    private val listener: ScrollListener
 ) {
 
     companion object {
@@ -27,12 +29,16 @@ class SwipeGestureHandler constructor(
     private var lastTouchY = 0f
     private var activePointerId = MotionEvent.INVALID_POINTER_ID
     private var currentDownEvent: MotionEvent? = null
+    private var dragStarted = false
 
     /**
      * 调用点击事件的处理逻辑
      */
     fun onTouchEvent(event: MotionEvent): Boolean {
         log.debug("onTouchEvent $event")
+        var pos = 0f
+        var movementDirection = 0f
+        var change = 0f
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 // Remember where we started (for dragging)
@@ -53,6 +59,9 @@ class SwipeGestureHandler constructor(
                 velocityTracker = velocityTracker ?: VelocityTracker.obtain()
                 // Add a user's movement to the tracker.
                 velocityTracker?.addMovement(event)
+
+                //stop drag
+                dragStarted = false
             }
             MotionEvent.ACTION_MOVE -> {
                 // Find the index of the active pointer and fetch its position
@@ -67,7 +76,7 @@ class SwipeGestureHandler constructor(
                 val scrollY = y - lastTouchY
 
                 log.debug("move x:$scrollX y:$scrollY")
-                swipeListener?.onScroll(currentDownEvent, event, scrollX, scrollY, x, y)
+                //listener.onScroll(currentDownEvent, event, scrollX, scrollY, x, y)
 
                 velocityTracker?.apply {
                     val pointerId = event.getPointerId(event.actionIndex)
@@ -82,8 +91,17 @@ class SwipeGestureHandler constructor(
                     val yVelocity = getYVelocity(pointerId)
                     log.debug("velocity x: $xVelocity y: $yVelocity")
 
-                    if (abs(xVelocity) > minimumFlingVelocity) {
-                        log.debug("Horizontal fling")
+                    val drag = xVelocity
+                    if (abs(drag) > 10f || dragStarted) {
+                        pos = listener.getProgress()
+                        if (!dragStarted) {
+                            dragStarted = true
+                        }
+
+                        movementDirection = listener.getMovementDistance()
+                        change = scrollX / movementDirection
+                        pos = max(min(pos + change, 1.0f), 0.0f)
+                        listener.onProgressChange(pos)
                     }
                 }
 
@@ -92,10 +110,13 @@ class SwipeGestureHandler constructor(
                 lastTouchY = y
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                pos = velocityTracker?.getXVelocity() ?: 0f
+
                 activePointerId = MotionEvent.INVALID_POINTER_ID
                 // Return a VelocityTracker object back to be re-used by others.
                 velocityTracker?.recycle()
                 velocityTracker = null
+                dragStarted = false
             }
             MotionEvent.ACTION_POINTER_UP -> {
 
@@ -123,5 +144,11 @@ interface ScrollListener {
         distanceX: Float, distanceY: Float,
         currentX: Float, currentY: Float
     )
+
+    fun getProgress(): Float
+
+    fun getMovementDistance(): Float
+
+    fun onProgressChange(progress: Float)
 }
 

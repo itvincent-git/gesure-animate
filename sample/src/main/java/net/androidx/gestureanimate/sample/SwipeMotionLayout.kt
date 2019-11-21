@@ -4,7 +4,7 @@ import android.content.Context
 import android.support.constraint.motion.MotionLayout
 import android.util.AttributeSet
 import android.view.MotionEvent
-import net.androidx.gestureanimate.SwipeGestureHandler
+import net.androidx.gestureanimate.GestureHandler
 import net.androidx.gestureanimate.ScrollListener
 import net.slog.SLoggerFactory
 
@@ -26,8 +26,21 @@ class SwipeMotionLayout @JvmOverloads constructor(
             log.debug("onScroll $xPercent")
             setInterpolatedProgress(xPercent)
         }
+
+        override fun getProgress(): Float {
+            return progress
+        }
+
+        override fun getMovementDistance(): Float {
+            return width.toFloat()
+        }
+
+        override fun onProgressChange(value: Float) {
+            log.debug("onProgressChange $progress")
+            progress = value
+        }
     }
-    private val swipeGestureHandler = SwipeGestureHandler(context, listener)
+    private val swipeGestureHandler = GestureHandler(context, listener)
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         //log.debug("onInterceptTouchEvent $event")
