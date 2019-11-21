@@ -15,7 +15,7 @@ import kotlin.math.min
  */
 class GestureHandler constructor(
     private val context: Context,
-    private val listener: DragProgressCallback
+    private val callback: DragProgressCallback
 ) {
 
     companion object {
@@ -93,15 +93,15 @@ class GestureHandler constructor(
 
                     val drag = xVelocity
                     if (abs(drag) > 10f || dragStarted) {
-                        pos = listener.getCurrentProgress()
+                        pos = callback.getCurrentProgress()
                         if (!dragStarted) {
                             dragStarted = true
                         }
 
-                        movementDirection = listener.getMovementDistance()
+                        movementDirection = callback.getMovementDistance()
                         change = scrollX / movementDirection
                         pos = max(min(pos + change, 1.0f), 0.0f)
-                        listener.onProgressChange(pos)
+                        callback.onProgressChange(pos)
                     }
                 }
 
@@ -111,16 +111,16 @@ class GestureHandler constructor(
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 pos = velocityTracker?.xVelocity ?: 0f
-                change = listener.getCurrentProgress()
-                val velocityToMove = pos / listener.getMovementDistance()
+                change = callback.getCurrentProgress()
+                val velocityToMove = pos / callback.getMovementDistance()
                 if (!velocityToMove.isNaN()) {
                     change += velocityToMove / 3f
                 }
                 if (change != 0f && change != 1f) {
                     if (change < 0.5f) {
-                        listener.onAnimateToStart()
+                        callback.onAnimateToStart()
                     } else {
-                        listener.onAnimateToEnd()
+                        callback.onAnimateToEnd()
                     }
                 }
 
