@@ -5,7 +5,8 @@ import android.support.constraint.motion.MotionLayout
 import android.util.AttributeSet
 import android.view.MotionEvent
 import net.androidx.gestureanimate.GestureHandler
-import net.androidx.gestureanimate.ScrollListener
+import net.androidx.gestureanimate.DragProgressCallback
+import net.androidx.gestureanimate.MovementDirection
 import net.slog.SLoggerFactory
 
 /**
@@ -16,18 +17,9 @@ class SwipeMotionLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : MotionLayout(context, attrs, defStyleAttr) {
 
-    private val listener = object : ScrollListener {
-        override fun onScroll(
-            e1: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float, currentX: Float,
-            currentY: Float
-        ) {
-            val w = width
-            val xPercent = currentX / w
-            log.debug("onScroll $xPercent")
-            setInterpolatedProgress(xPercent)
-        }
+    private val listener = object : DragProgressCallback {
 
-        override fun getProgress(): Float {
+        override fun getCurrentProgress(): Float {
             return progress
         }
 
@@ -35,17 +27,21 @@ class SwipeMotionLayout @JvmOverloads constructor(
             return width.toFloat()
         }
 
+        override fun getMovementDirection(): MovementDirection {
+            return MovementDirection.Horizontal
+        }
+
         override fun onProgressChange(value: Float) {
             log.debug("onProgressChange $progress")
             progress = value
         }
 
-        override fun onAnimateToProgress(value: Float) {
-            if (value == 0f) {
-                transitionToStart()
-            } else {
-                transitionToEnd()
-            }
+        override fun onAnimateToStart() {
+            transitionToStart()
+        }
+
+        override fun onAnimateToEnd() {
+            transitionToEnd()
         }
     }
     private val swipeGestureHandler = GestureHandler(context, listener)

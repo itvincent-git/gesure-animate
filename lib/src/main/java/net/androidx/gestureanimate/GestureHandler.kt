@@ -15,7 +15,7 @@ import kotlin.math.min
  */
 class GestureHandler constructor(
     private val context: Context,
-    private val listener: ScrollListener
+    private val listener: DragProgressCallback
 ) {
 
     companion object {
@@ -93,7 +93,7 @@ class GestureHandler constructor(
 
                     val drag = xVelocity
                     if (abs(drag) > 10f || dragStarted) {
-                        pos = listener.getProgress()
+                        pos = listener.getCurrentProgress()
                         if (!dragStarted) {
                             dragStarted = true
                         }
@@ -111,13 +111,17 @@ class GestureHandler constructor(
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 pos = velocityTracker?.xVelocity ?: 0f
-                change = listener.getProgress()
+                change = listener.getCurrentProgress()
                 val velocityToMove = pos / listener.getMovementDistance()
                 if (!velocityToMove.isNaN()) {
                     change += velocityToMove / 3f
                 }
                 if (change != 0f && change != 1f) {
-                    listener.onAnimateToProgress(if (change < 0.5f) 0f else 1f)
+                    if (change < 0.5f) {
+                        listener.onAnimateToStart()
+                    } else {
+                        listener.onAnimateToEnd()
+                    }
                 }
 
                 activePointerId = MotionEvent.INVALID_POINTER_ID
@@ -146,19 +150,20 @@ class GestureHandler constructor(
     }
 }
 
-interface ScrollListener {
-    fun onScroll(
-        e1: MotionEvent?, e2: MotionEvent,
-        distanceX: Float, distanceY: Float,
-        currentX: Float, currentY: Float
-    )
+interface DragProgressCallback {
 
-    fun getProgress(): Float
+    fun getCurrentProgress(): Float
 
     fun getMovementDistance(): Float
 
+    fun getMovementDirection(): MovementDirection
+
     fun onProgressChange(progress: Float)
 
-    fun onAnimateToProgress(value: Float)
+    fun onAnimateToStart()
+
+    fun onAnimateToEnd()
 }
+
+enum class MovementDirection { Horizontal, Vertical }
 
