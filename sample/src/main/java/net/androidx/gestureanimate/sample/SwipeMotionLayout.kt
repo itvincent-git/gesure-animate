@@ -32,7 +32,7 @@ class SwipeMotionLayout @JvmOverloads constructor(
         }
 
         override fun getMovementDirection(): MovementDirection {
-            return MovementDirection.Vertical
+            return MovementDirection.Horizontal
         }
 
         override fun onProgressChange(value: Float) {
