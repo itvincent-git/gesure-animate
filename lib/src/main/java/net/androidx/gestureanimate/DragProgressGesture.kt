@@ -10,10 +10,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * 提供滑动事件的处理能力
+ * 提供拖动手势的处理能力，支持横行/纵向的拖动
  * Created by zhongyongsheng on 2019-11-20.
  */
-class GestureHandler constructor(
+class DragProgressGesture constructor(
     private val context: Context,
     private val callback: DragProgressCallback
 ) {
@@ -28,7 +28,6 @@ class GestureHandler constructor(
     private var lastTouchX = 0f
     private var lastTouchY = 0f
     private var activePointerId = MotionEvent.INVALID_POINTER_ID
-    private var currentDownEvent: MotionEvent? = null
     private var dragStarted = false
 
     /**
@@ -46,11 +45,8 @@ class GestureHandler constructor(
                 lastTouchX = event.getX(pointerIndex)
                 lastTouchY = event.getY(pointerIndex)
                 activePointerId = event.getPointerId(pointerIndex)
-
-                if (currentDownEvent != null) {
-                    currentDownEvent!!.recycle()
-                }
-                currentDownEvent = MotionEvent.obtain(event)
+                //stop drag
+                dragStarted = false
 
                 // Reset the velocity tracker back to its initial state.
                 velocityTracker?.clear()
@@ -59,9 +55,6 @@ class GestureHandler constructor(
                 velocityTracker = velocityTracker ?: VelocityTracker.obtain()
                 // Add a user's movement to the tracker.
                 velocityTracker?.addMovement(event)
-
-                //stop drag
-                dragStarted = false
             }
             MotionEvent.ACTION_MOVE -> {
                 // Find the index of the active pointer and fetch its position
@@ -74,9 +67,6 @@ class GestureHandler constructor(
 
                 val scrollX = x - lastTouchX
                 val scrollY = y - lastTouchY
-
-                log.debug("move x:$scrollX y:$scrollY")
-                //listener.onScroll(currentDownEvent, event, scrollX, scrollY, x, y)
 
                 velocityTracker?.apply {
                     val pointerId = event.getPointerId(event.actionIndex)
@@ -91,7 +81,13 @@ class GestureHandler constructor(
                     val yVelocity = getYVelocity(pointerId)
                     log.debug("velocity x: $xVelocity y: $yVelocity")
 
-                    val drag = xVelocity
+                    val drag =
+                        if (callback.getMovementDirection() == MovementDirection.Horizontal) {
+                            xVelocity
+                        } else {
+                            yVelocity
+                        }
+
                     if (abs(drag) > 10f || dragStarted) {
                         pos = callback.getCurrentProgress()
                         if (!dragStarted) {
@@ -99,7 +95,13 @@ class GestureHandler constructor(
                         }
 
                         movementDirection = callback.getMovementDistance()
-                        change = scrollX / movementDirection
+                        change =
+                            if (callback.getMovementDirection() == MovementDirection.Horizontal) {
+                                scrollX / movementDirection
+                            } else {
+                                scrollY / movementDirection
+                            }
+
                         pos = max(min(pos + change, 1.0f), 0.0f)
                         callback.onProgressChange(pos)
                     }
@@ -110,17 +112,26 @@ class GestureHandler constructor(
                 lastTouchY = y
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                pos = velocityTracker?.xVelocity ?: 0f
-                change = callback.getCurrentProgress()
-                val velocityToMove = pos / callback.getMovementDistance()
-                if (!velocityToMove.isNaN()) {
-                    change += velocityToMove / 3f
-                }
-                if (change != 0f && change != 1f) {
-                    if (change < 0.5f) {
-                        callback.onAnimateToStart()
-                    } else {
-                        callback.onAnimateToEnd()
+
+                velocityTracker?.apply {
+                    val pointerId = event.getPointerId(event.actionIndex)
+                    val velocity =
+                        if (callback.getMovementDirection() == MovementDirection.Horizontal) {
+                            getXVelocity(pointerId)
+                        } else {
+                            getYVelocity(pointerId)
+                        }
+                    change = callback.getCurrentProgress()
+                    val velocityToMove = velocity / callback.getMovementDistance()
+                    if (!velocityToMove.isNaN()) {
+                        change += velocityToMove / 3f
+                    }
+                    if (change != 0f && change != 1f) {
+                        if (change < 0.5f) {
+                            callback.onAnimateToStart()
+                        } else {
+                            callback.onAnimateToEnd()
+                        }
                     }
                 }
 

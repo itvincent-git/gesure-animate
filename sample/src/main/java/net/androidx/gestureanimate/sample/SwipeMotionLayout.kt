@@ -4,7 +4,7 @@ import android.content.Context
 import android.support.constraint.motion.MotionLayout
 import android.util.AttributeSet
 import android.view.MotionEvent
-import net.androidx.gestureanimate.GestureHandler
+import net.androidx.gestureanimate.DragProgressGesture
 import net.androidx.gestureanimate.DragProgressCallback
 import net.androidx.gestureanimate.MovementDirection
 import net.slog.SLoggerFactory
@@ -24,11 +24,15 @@ class SwipeMotionLayout @JvmOverloads constructor(
         }
 
         override fun getMovementDistance(): Float {
-            return width.toFloat()
+            return if (getMovementDirection() == MovementDirection.Horizontal) {
+                width.toFloat()
+            } else {
+                height.toFloat()
+            }
         }
 
         override fun getMovementDirection(): MovementDirection {
-            return MovementDirection.Horizontal
+            return MovementDirection.Vertical
         }
 
         override fun onProgressChange(value: Float) {
@@ -44,7 +48,7 @@ class SwipeMotionLayout @JvmOverloads constructor(
             transitionToEnd()
         }
     }
-    private val swipeGestureHandler = GestureHandler(context, listener)
+    private val swipeGestureHandler = DragProgressGesture(context, listener)
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         //log.debug("onInterceptTouchEvent $event")
