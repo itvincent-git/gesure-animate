@@ -17,7 +17,7 @@ class SwipeMotionLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : MotionLayout(context, attrs, defStyleAttr) {
 
-    private val listener = object : DragProgressCallback {
+    private val callback = object : DragProgressCallback {
 
         override fun getCurrentProgress(): Float {
             return progress
@@ -48,12 +48,12 @@ class SwipeMotionLayout @JvmOverloads constructor(
             transitionToEnd()
         }
     }
-    private val swipeGestureHandler = DragProgressGesture(context, listener)
+    private val gesture = DragProgressGesture(context, callback)
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         //log.debug("onInterceptTouchEvent $event")
         //根据flingTouchListener决定是否拦截事件
-        return if (this.swipeGestureHandler.onTouchEvent(event)) {
+        return if (this.gesture.onTouchEvent(event)) {
             true
         } else super.onInterceptTouchEvent(event)
     }
