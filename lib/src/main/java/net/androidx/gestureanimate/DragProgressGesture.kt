@@ -79,7 +79,7 @@ class DragProgressGesture constructor(
                     val xVelocity = getXVelocity(pointerId)
                     val yVelocity = getYVelocity(pointerId)
 
-                    val drag =
+                    val dragVelocity =
                         if (callback.getMovementDirection() == MovementDirection.Horizontal) {
                             xVelocity
                         } else {
@@ -87,7 +87,7 @@ class DragProgressGesture constructor(
                         }
 
                     //如果拖动的速度足够或已经在拖动中
-                    if (abs(drag) > 10f || dragStarted) {
+                    if (abs(dragVelocity) > 10f || dragStarted) {
                         pos = callback.getCurrentProgress()
                         if (!dragStarted) {
                             dragStarted = true
