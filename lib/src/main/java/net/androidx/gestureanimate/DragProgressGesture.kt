@@ -34,7 +34,6 @@ class DragProgressGesture constructor(
      * 调用点击事件的处理逻辑
      */
     fun onTouchEvent(event: MotionEvent): Boolean {
-        log.debug("onTouchEvent $event")
         var pos = 0f
         var movementDirection = 0f
         var change = 0f
@@ -79,7 +78,6 @@ class DragProgressGesture constructor(
                     // Best practice to use VelocityTrackerCompat where possible.
                     val xVelocity = getXVelocity(pointerId)
                     val yVelocity = getYVelocity(pointerId)
-                    log.debug("velocity x: $xVelocity y: $yVelocity")
 
                     val drag =
                         if (callback.getMovementDirection() == MovementDirection.Horizontal) {
@@ -88,6 +86,7 @@ class DragProgressGesture constructor(
                             yVelocity
                         }
 
+                    //如果拖动的速度足够或已经在拖动中
                     if (abs(drag) > 10f || dragStarted) {
                         pos = callback.getCurrentProgress()
                         if (!dragStarted) {
@@ -95,13 +94,14 @@ class DragProgressGesture constructor(
                         }
 
                         movementDirection = callback.getMovementDistance()
+                        //根据方向计算拖动的比例
                         change =
                             if (callback.getMovementDirection() == MovementDirection.Horizontal) {
                                 scrollX / movementDirection
                             } else {
                                 scrollY / movementDirection
                             }
-
+                        //加入到当前的比例中
                         pos = max(min(pos + change, 1.0f), 0.0f)
                         callback.onProgressChange(pos)
                     }
@@ -114,7 +114,10 @@ class DragProgressGesture constructor(
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
 
                 velocityTracker?.apply {
+                    //计算速度
+                    computeCurrentVelocity(1000, maximumFlingVelocity)
                     val pointerId = event.getPointerId(event.actionIndex)
+                    //根据方向取速度
                     val velocity =
                         if (callback.getMovementDirection() == MovementDirection.Horizontal) {
                             getXVelocity(pointerId)
@@ -122,10 +125,12 @@ class DragProgressGesture constructor(
                             getYVelocity(pointerId)
                         }
                     change = callback.getCurrentProgress()
+                    //按照速度计算松开后还要滑动的比例
                     val velocityToMove = velocity / callback.getMovementDistance()
                     if (!velocityToMove.isNaN()) {
                         change += velocityToMove / 3f
                     }
+                    //百分比过半则做动画到结束，否则返回开始
                     if (change != 0f && change != 1f) {
                         if (change < 0.5f) {
                             callback.onAnimateToStart()
