@@ -1,6 +1,8 @@
 package net.androidx.gestureanimate
 
 import android.content.Context
+import android.graphics.Rect
+import android.support.v4.widget.ViewDragHelper
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
@@ -15,10 +17,36 @@ import kotlin.math.min
  */
 class DragProgressGesture constructor(
     private val context: Context,
-    private val callback: DragProgressCallback
+    private val callback: DragProgressCallback,
+    private val edgeCallback: DragEdgeCallback?
 ) {
 
     companion object {
+        /**
+         * Edge flag indicating that the left edge should be affected.
+         */
+        const val EDGE_LEFT = 1 shl 0
+
+        /**
+         * Edge flag indicating that the right edge should be affected.
+         */
+        const val EDGE_RIGHT = 1 shl 1
+
+        /**
+         * Edge flag indicating that the top edge should be affected.
+         */
+        const val EDGE_TOP = 1 shl 2
+
+        /**
+         * Edge flag indicating that the bottom edge should be affected.
+         */
+        const val EDGE_BOTTOM = 1 shl 3
+
+        /**
+         * 触摸边缘的宽度
+         */
+        const val EDGE_SIZE = 20 // dp
+
         private val log = SLoggerFactory.getLogger("SwipeGestureHandler")
     }
 
@@ -29,6 +57,28 @@ class DragProgressGesture constructor(
     private var lastTouchY = 0f
     private var activePointerId = MotionEvent.INVALID_POINTER_ID
     private var dragStarted = false
+    private val density = context.resources.displayMetrics.density
+    private var edgesTouched = 0
+    private var state = DragState.Idle
+
+    private fun getEdgesTouched(x: Int, y: Int): Int {
+        var result = 0
+        if (edgeCallback != null) {
+            if (x < edgeCallback.getViewRect().left + edgeSize) result =
+                result or ViewDragHelper.EDGE_LEFT
+            if (y < edgeCallback.getViewRect().top + edgeSize) result =
+                result or ViewDragHelper.EDGE_TOP
+            if (x > edgeCallback.getViewRect().right - edgeSize) result =
+                result or ViewDragHelper.EDGE_RIGHT
+            if (y > edgeCallback.getViewRect().bottom - edgeSize) result =
+                result or ViewDragHelper.EDGE_BOTTOM
+        }
+        return result
+    }
+
+    //<editor-fold desc="Open API">
+    var edgeSize = (EDGE_SIZE * density + 0.5f).toInt()
+    var trackingEdges = 0
 
     /**
      * 调用点击事件的处理逻辑
@@ -46,6 +96,16 @@ class DragProgressGesture constructor(
                 activePointerId = event.getPointerId(pointerIndex)
                 //stop drag
                 dragStarted = false
+
+                if (state != DragState.Start) {
+                    state = DragState.Start
+                    callback.onDragStateChange(DragState.Start)
+                }
+
+                edgesTouched = getEdgesTouched(lastTouchX.toInt(), lastTouchY.toInt())
+                if (edgesTouched and trackingEdges != 0 && edgeCallback != null) {
+                    edgeCallback.onEdgeTouched(edgesTouched and trackingEdges)
+                }
 
                 // Reset the velocity tracker back to its initial state.
                 velocityTracker?.clear()
@@ -91,6 +151,10 @@ class DragProgressGesture constructor(
                         pos = callback.getCurrentProgress()
                         if (!dragStarted) {
                             dragStarted = true
+                            if (state != DragState.Dragging) {
+                                state = DragState.Dragging
+                                callback.onDragStateChange(DragState.Dragging)
+                            }
                         }
 
                         movementDirection = callback.getMovementDistance()
@@ -145,6 +209,10 @@ class DragProgressGesture constructor(
                 velocityTracker?.recycle()
                 velocityTracker = null
                 dragStarted = false
+                if (state != DragState.Idle) {
+                    state = DragState.Idle
+                    callback.onDragStateChange(DragState.Idle)
+                }
             }
             MotionEvent.ACTION_POINTER_UP -> {
 
@@ -164,22 +232,64 @@ class DragProgressGesture constructor(
         }
         return false
     }
+
+    //</editor-fold>
+
 }
 
 interface DragProgressCallback {
 
+    fun onDragStateChange(state: DragState)
+
+    /**
+     * 返回当前的MotionLayout.progress
+     */
     fun getCurrentProgress(): Float
 
+    /**
+     * 横向/纵向的最大移动距离，一般指view.width/height
+     */
     fun getMovementDistance(): Float
 
+    /**
+     * 横向/纵向拖动
+     */
     fun getMovementDirection(): MovementDirection
 
+    /**
+     * 拖动时progress变化的通知
+     */
     fun onProgressChange(progress: Float)
 
+    /**
+     * 实现触发直接做动画到开始
+     */
     fun onAnimateToStart()
 
+    /**
+     * 实现触发直接做动画到结束
+     */
     fun onAnimateToEnd()
 }
+
+interface DragEdgeCallback {
+    /**
+     * 返回拖动的view的上下左右位置
+     */
+    fun getViewRect(): Rect
+
+    /**
+     * 当边缘被触碰时回调
+     * @param edgesTouched 边缘标记的组合，描述了当前触摸的边缘
+     * @see #EDGE_LEFT
+     * @see #EDGE_TOP
+     * @see #EDGE_RIGHT
+     * @see #EDGE_BOTTOM
+     */
+    fun onEdgeTouched(edgesTouched: Int)
+}
+
+enum class DragState { Idle, Start, Dragging }
 
 enum class MovementDirection { Horizontal, Vertical }
 

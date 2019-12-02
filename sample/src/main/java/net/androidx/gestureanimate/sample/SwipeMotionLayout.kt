@@ -1,11 +1,14 @@
 package net.androidx.gestureanimate.sample
 
 import android.content.Context
+import android.graphics.Rect
 import android.support.constraint.motion.MotionLayout
 import android.util.AttributeSet
 import android.view.MotionEvent
+import net.androidx.gestureanimate.DragEdgeCallback
 import net.androidx.gestureanimate.DragProgressGesture
 import net.androidx.gestureanimate.DragProgressCallback
+import net.androidx.gestureanimate.DragState
 import net.androidx.gestureanimate.MovementDirection
 import net.slog.SLoggerFactory
 
@@ -16,8 +19,15 @@ import net.slog.SLoggerFactory
 class SwipeMotionLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : MotionLayout(context, attrs, defStyleAttr) {
+    var isOnTouchLeft = false
 
     private val callback = object : DragProgressCallback {
+        override fun onDragStateChange(state: DragState) {
+            log.debug("onDragStateChange $state")
+            when (state) {
+                DragState.Start -> isOnTouchLeft = false
+            }
+        }
 
         override fun getCurrentProgress(): Float {
             return progress
@@ -37,18 +47,41 @@ class SwipeMotionLayout @JvmOverloads constructor(
 
         override fun onProgressChange(value: Float) {
             log.debug("onProgressChange $progress")
-            progress = value
+            if (!isOnTouchLeft) {
+                progress = value
+            }
         }
 
         override fun onAnimateToStart() {
-            transitionToStart()
+            if (!isOnTouchLeft) {
+                transitionToStart()
+            }
         }
 
         override fun onAnimateToEnd() {
-            transitionToEnd()
+            if (!isOnTouchLeft) {
+                transitionToEnd()
+            }
         }
     }
-    private val gesture = DragProgressGesture(context, callback)
+
+    private val edgeCallback = object : DragEdgeCallback {
+        override fun getViewRect(): Rect {
+            return Rect(left, top, right, bottom)
+        }
+
+        override fun onEdgeTouched(edgesTouched: Int) {
+            //左边边缘触摸，则不能拖动
+            if (edgesTouched and DragProgressGesture.EDGE_LEFT == 1) {
+                log.debug("onEdgeTouched Left")
+                isOnTouchLeft = true
+            }
+        }
+    }
+
+    private val gesture = DragProgressGesture(context, callback, edgeCallback).apply {
+        trackingEdges = DragProgressGesture.EDGE_LEFT
+    }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         //log.debug("onInterceptTouchEvent $event")
