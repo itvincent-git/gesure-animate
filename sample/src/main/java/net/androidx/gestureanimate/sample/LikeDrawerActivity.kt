@@ -3,10 +3,10 @@ package net.androidx.gestureanimate.sample
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 
-class UnsmoothClickActivity : AppCompatActivity() {
+class LikeDrawerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_unsmooth_click)
+        setContentView(R.layout.activity_like_drawer)
     }
 }

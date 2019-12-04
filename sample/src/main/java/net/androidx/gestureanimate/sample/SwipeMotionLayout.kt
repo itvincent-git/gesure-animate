@@ -19,6 +19,11 @@ import net.slog.SLoggerFactory
 class SwipeMotionLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : MotionLayout(context, attrs, defStyleAttr) {
+
+    companion object {
+        val log = SLoggerFactory.getLogger("SwipeMotionLayout")
+    }
+
     var isOnTouchLeft = false
 
     private val callback = object : DragProgressCallback {
@@ -42,7 +47,7 @@ class SwipeMotionLayout @JvmOverloads constructor(
         }
 
         override fun getMovementDirection(): MovementDirection {
-            return MovementDirection.Horizontal
+            return MovementDirection.Vertical
         }
 
         override fun onProgressChange(value: Float) {
@@ -94,16 +99,7 @@ class SwipeMotionLayout @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         //log.debug("onTouchEvent $event")
         //避免子view都不处理down事件时，无法收到其余的事件
+        this.gesture.onTouchEvent(event)
         return true
-    }
-
-    /*override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        return super.dispatchTouchEvent(ev).apply {
-            log.debug("dispatchTouchEvent $this $ev")
-        }
-    }*/
-
-    companion object {
-        val log = SLoggerFactory.getLogger("SwipeMotionLayout")
     }
 }
