@@ -13,7 +13,7 @@ import net.androidx.gestureanimate.UnsmoothClickGesture
  * Created by zhongyongsheng on 2019-12-04.
  */
 
-class CustomView @JvmOverloads constructor(
+class CustomClickView @JvmOverloads constructor(
     context: Context, attr: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attr, defStyleAttr) {
     private val gesture = UnsmoothClickGesture(context, object : UnsmoothClickCallback {

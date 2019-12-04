@@ -29,6 +29,7 @@ class UnsmoothClickGesture constructor(
      * 调用点击事件的处理逻辑
      */
     fun onTouchEvent(event: MotionEvent): Boolean {
+        log.debug("onTouchEvent $event")
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 // Reset the velocity tracker back to its initial state.

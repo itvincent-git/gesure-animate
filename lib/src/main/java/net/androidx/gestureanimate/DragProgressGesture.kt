@@ -102,9 +102,10 @@ class DragProgressGesture constructor(
                     callback.onDragStateChange(DragState.Start)
                 }
 
+                var shouldIntercept = false
                 edgesTouched = getEdgesTouched(lastTouchX.toInt(), lastTouchY.toInt())
                 if (edgesTouched and trackingEdges != 0 && edgeCallback != null) {
-                    edgeCallback.onEdgeTouched(edgesTouched and trackingEdges)
+                    shouldIntercept = edgeCallback.onEdgeTouched(edgesTouched and trackingEdges)
                 }
 
                 // Reset the velocity tracker back to its initial state.
@@ -114,6 +115,8 @@ class DragProgressGesture constructor(
                 velocityTracker = velocityTracker ?: VelocityTracker.obtain()
                 // Add a user's movement to the tracker.
                 velocityTracker?.addMovement(event)
+
+                return shouldIntercept
             }
             MotionEvent.ACTION_MOVE -> {
                 // Find the index of the active pointer and fetch its position
@@ -232,9 +235,7 @@ class DragProgressGesture constructor(
         }
         return false
     }
-
     //</editor-fold>
-
 }
 
 interface DragProgressCallback {
@@ -285,8 +286,10 @@ interface DragEdgeCallback {
      * @see #EDGE_TOP
      * @see #EDGE_RIGHT
      * @see #EDGE_BOTTOM
+     *
+     * @return true 拦截Down事件，false不拦截
      */
-    fun onEdgeTouched(edgesTouched: Int)
+    fun onEdgeTouched(edgesTouched: Int): Boolean
 }
 
 enum class DragState { Idle, Start, Dragging }

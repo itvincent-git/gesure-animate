@@ -75,12 +75,14 @@ class SwipeMotionLayout @JvmOverloads constructor(
             return Rect(left, top, right, bottom)
         }
 
-        override fun onEdgeTouched(edgesTouched: Int) {
+        override fun onEdgeTouched(edgesTouched: Int): Boolean {
             //左边边缘触摸，则不能拖动
             if (edgesTouched and DragProgressGesture.EDGE_LEFT == 1) {
                 log.debug("onEdgeTouched Left")
                 isOnTouchLeft = true
+                return true
             }
+            return false
         }
     }
 
