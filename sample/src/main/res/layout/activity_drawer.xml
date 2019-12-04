@@ -25,8 +25,8 @@
 
         <net.androidx.gestureanimate.sample.CustomView
             android:id="@+id/click_view"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
             android:background="#AF1090"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
