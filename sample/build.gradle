@@ -36,4 +36,5 @@ dependencies {
     implementation project(':lib')
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation "net.pixelcompat:pixelcompat:0.3.0"
 }

@@ -20,7 +20,6 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    //implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     implementation "com.android.support.constraint:constraint-layout:$constraint_layout_version"
     implementation "com.android.support:recyclerview-v7:$support_version"
     implementation ("net.slog:slog-api:$slog_version") {
@@ -28,6 +27,7 @@ dependencies {
         exclude group: 'org.jetbrains.kotlinx'
     }
     compileOnly "com.android.support:support-annotations:${support_version}"
+    implementation "com.android.support:design:${support_version}"
 }
 
 //private below
