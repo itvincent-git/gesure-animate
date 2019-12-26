@@ -29,6 +29,19 @@
                 app:attributeName="alpha"
                 app:customFloatValue="1" />
         </Constraint>
+        <Constraint
+            android:id="@+id/background"
+            android:layout_width="@dimen/px200dp"
+            android:layout_height="0dp"
+            android:src="@drawable/countdown_item1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+            <CustomAttribute
+                app:attributeName="alpha"
+                app:customFloatValue="1" />
+        </Constraint>
     </ConstraintSet>
 
     <ConstraintSet android:id="@+id/end">
@@ -43,6 +56,19 @@
             app:layout_constraintBottom_toBottomOf="@+id/background"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
+            <CustomAttribute
+                app:attributeName="alpha"
+                app:customFloatValue="0" />
+        </Constraint>
+        <Constraint
+            android:id="@+id/background"
+            android:layout_width="@dimen/px200dp"
+            android:layout_height="0dp"
+            android:src="@drawable/countdown_item1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
             <CustomAttribute
                 app:attributeName="alpha"
                 app:customFloatValue="0" />
