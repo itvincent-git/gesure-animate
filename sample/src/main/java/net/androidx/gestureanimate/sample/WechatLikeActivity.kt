@@ -11,6 +11,6 @@ class WechatLikeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wechat_like)
 
-        large_tv.text = createRandomString(4096)
+        large_tv.text = createRandomString(1024 * 8)
     }
 }

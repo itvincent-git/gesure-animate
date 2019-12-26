@@ -19,26 +19,33 @@
     app:layoutDescription="@xml/scene_wechat_like"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:minHeight="50dp"
+    android:minHeight="@dimen/px90dp"
+    android:background="#000000"
     android:fitsSystemWindows="false"
-    app:layout_scrollFlags="scroll|enterAlways|snap|exitUntilCollapsed">
+    app:layout_scrollFlags="scroll|snap|exitUntilCollapsed">
 
     <ImageView
         android:id="@+id/background"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="@color/colorAccent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/countdown_item1"/>
+        android:layout_width="@dimen/px200dp"
+        android:layout_height="0dp"
+        android:src="@drawable/countdown_item1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Begin Matching"
+        android:textColor="#FFF"
+        android:textSize="@dimen/px20dp"
         android:transformPivotX="0dp"
         android:transformPivotY="0dp"
-        android:text="Hello Text"
-        android:textColor="#FFF"
-        android:textSize="32dp" />
+        android:layout_marginBottom="@dimen/px16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </net.androidx.gestureanimate.CollapsibleToolbar>
