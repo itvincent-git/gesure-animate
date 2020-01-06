@@ -2,6 +2,7 @@ package net.androidx.gestureanimate.sample
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import kotlinx.android.synthetic.main.activity_wechat_like.app_bar
 import kotlinx.android.synthetic.main.layout_content_scrolling.large_tv
 import net.androidx.gestureanimate.util.createRandomString
 
