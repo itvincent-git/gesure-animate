@@ -6,6 +6,7 @@ import android.view.View
 import net.slog.SLoggerFactory
 
 /**
+ * 实现相似微信2楼的交互效果，这是1楼ScrollingView/RecycleView使用的Behavior
  * Created by zhongyongsheng on 2020-01-02.
  */
 class WeChatLikeScrollingViewBehavior @JvmOverloads constructor(
