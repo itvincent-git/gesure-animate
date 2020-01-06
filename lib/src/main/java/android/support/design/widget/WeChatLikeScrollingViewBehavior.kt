@@ -2,6 +2,7 @@ package android.support.design.widget
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import net.slog.SLoggerFactory
 
@@ -11,20 +12,20 @@ import net.slog.SLoggerFactory
  */
 class WeChatLikeScrollingViewBehavior @JvmOverloads constructor(
     context: Context? = null, attrs: AttributeSet? = null
-) : AppBarLayout.ScrollingViewBehavior() {
+) : WeChatScrollingViewBehavior() {
 
-    override fun onStartNestedScroll(
-        coordinatorLayout: CoordinatorLayout, child: View, directTargetChild: View, target: View, axes: Int, type: Int
-    ): Boolean {
-        log.debug(
-            "onStartNestedScroll ${child.javaClass} ${directTargetChild.javaClass} ${target.javaClass} $axes $type")
-        return super.onStartNestedScroll(coordinatorLayout, child, directTargetChild, target, axes, type)
-    }
+//    override fun onStartNestedScroll(
+//        coordinatorLayout: CoordinatorLayout, child: View, directTargetChild: View, target: View, axes: Int, type: Int
+//    ): Boolean {
+//        log.debug(
+//            "onStartNestedScroll ${child.javaClass} ${directTargetChild.javaClass} ${target.javaClass} $axes $type")
+//        return super.onStartNestedScroll(coordinatorLayout, child, directTargetChild, target, axes, type)
+//    }
 
-    override fun onDependentViewChanged(parent: CoordinatorLayout, child: View, dependency: View): Boolean {
+//    override fun onDependentViewChanged(parent: CoordinatorLayout, child: View, dependency: View): Boolean {
 //        return super.onDependentViewChanged(parent, child, dependency)
-        return false
-    }
+//        return false
+//    }
 
     companion object {
         private val log = SLoggerFactory.getLogger("WeChatLikeScrollingViewBehavior")
