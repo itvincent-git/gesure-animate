@@ -21,6 +21,7 @@ import net.slog.SLogger;
 import net.slog.SLoggerFactory;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -49,6 +50,7 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
 
     public boolean onStartNestedScroll(CoordinatorLayout parent, T child, View directTargetChild,
                                        View target, int nestedScrollAxes, int type) {
+        log.debug("onStartNestedScroll");
         boolean started = (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0
                 && (child.isLiftOnScroll() || this.canScrollChildren(parent, child, directTargetChild));
         if (started && this.offsetAnimator != null) {
@@ -67,6 +69,8 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
 
     public void onNestedPreScroll(CoordinatorLayout coordinatorLayout, T child, View target, int dx,
                                   int dy, int[] consumed, int type) {
+        log.debug("onNestedPreScroll[x:%d] [y:%d] %s %d",dx, dy, Arrays.toString(consumed), type);
+        //处理向上滚动的逻辑
         if (dy != 0) {
             int min;
             int max;
@@ -78,6 +82,7 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
                 max = 0;
             }
 
+            log.debug("onNestedPreScroll min:%d max:%d", min, max);
             if (min != max) {
                 consumed[1] = this.scroll(coordinatorLayout, child, dy, min, max);
                 this.stopNestedScrollIfNeeded(dy, child, target, type);
@@ -89,6 +94,7 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
     public void onNestedScroll(CoordinatorLayout coordinatorLayout, T child, View target,
                                int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed,
                                int type) {
+        //处理向下滚动的逻辑
         if (dyUnconsumed < 0) {
             this.scroll(coordinatorLayout, child, dyUnconsumed, -child.getDownNestedScrollRange(),
                     0);
@@ -128,6 +134,7 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
 
     private void animateOffsetTo(CoordinatorLayout coordinatorLayout, T child, int offset,
                                  float velocity) {
+        //log.debug("animateOffsetTo %d", offset);
         int distance = Math.abs(this.getTopBottomOffsetForScrollingSibling() - offset);
         velocity = Math.abs(velocity);
         int duration;

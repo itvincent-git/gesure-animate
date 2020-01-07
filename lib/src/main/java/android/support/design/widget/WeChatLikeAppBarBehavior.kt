@@ -1,6 +1,7 @@
 package android.support.design.widget
 
 import android.content.Context
+import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.view.View
 import net.slog.SLoggerFactory
@@ -13,43 +14,27 @@ class WeChatLikeAppBarBehavior @JvmOverloads constructor(
     context: Context? = null, attrs: AttributeSet? = null
 ) : WeChatBaseBehavior<AppBarLayout>() {
 
-//    override fun onFlingFinished(parent: CoordinatorLayout?, layout: AppBarLayout?) {
-//        log.debug("onFlingFinished")
-//    }
-
-//    override fun onStartNestedScroll(
-//        parent: CoordinatorLayout, child: AppBarLayout, directTargetChild: View, target: View, nestedScrollAxes: Int,
-//        type: Int
-//    ): Boolean {
-//        log.debug(
-//            "onStartNestedScroll ${child.javaClass} ${directTargetChild.javaClass} ${target.javaClass} $nestedScrollAxes $type")
-//        return super.onStartNestedScroll(parent, child, directTargetChild, target, nestedScrollAxes, type)
-//    }
-
-//    override fun onNestedPreScroll(
-//        coordinatorLayout: CoordinatorLayout, child: AppBarLayout, target: View, dx: Int, dy: Int, consumed: IntArray,
-//        type: Int
-//    ) {
-//        log.debug(
-//            "onNestedPreScroll ${child.javaClass} ${target.javaClass} $dx $dy [${consumed.joinToString()}] $type")
-//        super.onNestedPreScroll(coordinatorLayout, child, target, dx, dy, consumed, type)
-//    }
-
-//    override fun onNestedScroll(
-//        coordinatorLayout: CoordinatorLayout, child: AppBarLayout, target: View, dxConsumed: Int, dyConsumed: Int,
-//        dxUnconsumed: Int, dyUnconsumed: Int, type: Int
-//    ) {
-//        log.debug("onNestedScroll $dyUnconsumed")
-//        if (dyUnconsumed < 0) {
-//            scroll(coordinatorLayout, child, dyUnconsumed, -child.downNestedScrollRange,
-//                0)
-//            stopNestedScrollIfNeeded(dyUnconsumed, child, target, type)
-//        }
-//
-//        if (child.isLiftOnScroll) {
-//            child.setLiftedState(target.scrollY > 0)
-//        }
-//    }
+    override fun onNestedScroll(
+        coordinatorLayout: CoordinatorLayout, child: AppBarLayout, target: View, dxConsumed: Int, dyConsumed: Int,
+        dxUnconsumed: Int, dyUnconsumed: Int, type: Int
+    ) {
+        //处理向下滚动的逻辑
+        if (dyUnconsumed < 0) {
+            log.debug("onNestedScroll [x:%d %d] [y:%d %d] type:%d", dxConsumed, dxUnconsumed,
+                dyConsumed, dyUnconsumed, type)
+            if (type == 0) {
+                scroll(coordinatorLayout, child, dyUnconsumed,
+                    -child.getDownNestedScrollRange(),
+                    0)
+                stopNestedScrollIfNeeded(dyUnconsumed, child, target, type)
+            } else {
+                ViewCompat.stopNestedScroll(target, 1)
+            }
+        }
+        if (child.isLiftOnScroll()) {
+            child.setLiftedState(target.scrollY > 0)
+        }
+    }
 
     companion object {
         private val log = SLoggerFactory.getLogger("WeChatLikeAppBarBehavior")

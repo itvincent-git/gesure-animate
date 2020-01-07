@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.design.widget.AppBarLayout
 import android.support.v7.app.AppCompatActivity
 import android.view.animation.AnimationUtils
+import android.view.animation.DecelerateInterpolator
 import android.view.animation.Interpolator
 import kotlinx.android.synthetic.main.activity_wechat_like.app_bar
 import kotlinx.android.synthetic.main.layout_content_scrolling.large_tv
@@ -25,8 +26,11 @@ class WechatLikeActivity : AppCompatActivity() {
 
         large_tv.text = createRandomString(1024 * 8)
 
-        app_bar.addOnOffsetChangedListener(
-            ChangeInterceptorListener(this, motionLayout.layoutParams as AppBarLayout.LayoutParams))
+        val headerLayoutParam = motionLayout.layoutParams as AppBarLayout.LayoutParams
+//        headerLayoutParam.scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL or AppBarLayout.LayoutParams
+//            .SCROLL_FLAG_EXIT_UNTIL_COLLAPSED or AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
+
+        app_bar.addOnOffsetChangedListener(ChangeInterceptorListener(this, headerLayoutParam))
     }
 }
 
@@ -36,8 +40,7 @@ class WechatLikeActivity : AppCompatActivity() {
 class ChangeInterceptorListener(val context: Context, val layoutParam: AppBarLayout.LayoutParams) :
     AppBarLayout.OnOffsetChangedListener {
     private var lastOffset = 0
-    val interpolator: Interpolator? =
-        AnimationUtils.loadInterpolator(context, android.R.anim.decelerate_interpolator)
+    val interpolator: Interpolator = DecelerateInterpolator(1.8f)
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
         if (lastOffset != verticalOffset) {
@@ -48,6 +51,7 @@ class ChangeInterceptorListener(val context: Context, val layoutParam: AppBarLay
                 log.debug("onAppBarMinimize")
                 layoutParam.scrollInterpolator = interpolator
             } else if (verticalOffset.absoluteValue == 0) {
+                // appbar最大化
                 log.debug("onAppBarMaximize")
                 layoutParam.scrollInterpolator = null
             }
