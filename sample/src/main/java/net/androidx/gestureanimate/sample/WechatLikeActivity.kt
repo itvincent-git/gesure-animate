@@ -14,7 +14,7 @@ import net.slog.SLoggerFactory
 
 class WechatLikeActivity : AppCompatActivity() {
     private val myAdapter = MyAdapter(mutableListOf()).apply {
-        for (i in 0 until 30) {
+        for (i in 0 until 50) {
             myDataset.add(createRandomString(10))
         }
     }

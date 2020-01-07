@@ -13,7 +13,7 @@ class ChangeInterceptorListener(val context: Context, val layoutParam: AppBarLay
     AppBarLayout.OnOffsetChangedListener {
     private var lastOffset = 0
     val interpolator: Interpolator =
-        DecelerateInterpolator(1.0f)
+        DecelerateInterpolator(1.1f)
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
         if (lastOffset != verticalOffset) {
