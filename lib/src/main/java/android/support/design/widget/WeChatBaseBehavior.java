@@ -49,8 +49,8 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
 
     public boolean onStartNestedScroll(CoordinatorLayout parent, T child, View directTargetChild,
                                        View target, int nestedScrollAxes, int type) {
-        boolean started = (nestedScrollAxes & 2) != 0 && (child.isLiftOnScroll() ||
-                this.canScrollChildren(parent, child, directTargetChild));
+        boolean started = (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0
+                && (child.isLiftOnScroll() || this.canScrollChildren(parent, child, directTargetChild));
         if (started && this.offsetAnimator != null) {
             this.offsetAnimator.cancel();
         }
