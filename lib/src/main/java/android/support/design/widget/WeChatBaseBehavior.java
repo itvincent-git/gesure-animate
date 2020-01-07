@@ -24,6 +24,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 /**
+ * 从AppBarLayout.BaseBehavior抽离出来
  * Created by zhongyongsheng on 2020-01-06.
  */
 public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T> {
@@ -162,7 +163,7 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
                 this.offsetAnimator.cancel();
             }
 
-            this.offsetAnimator.setDuration((long) Math.min(duration, 600));
+            this.offsetAnimator.setDuration((long) Math.min(duration, MAX_OFFSET_ANIMATION_DURATION));
             this.offsetAnimator.setIntValues(new int[]{currentOffset, offset});
             this.offsetAnimator.start();
         }
@@ -176,7 +177,7 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
             int top = child.getTop();
             int bottom = child.getBottom();
             AppBarLayout.LayoutParams lp = (AppBarLayout.LayoutParams) child.getLayoutParams();
-            if (checkFlag(lp.getScrollFlags(), 32)) {
+            if (checkFlag(lp.getScrollFlags(), AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP_MARGINS)) {
                 top -= lp.topMargin;
                 bottom += lp.bottomMargin;
             }
@@ -197,7 +198,7 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
             AppBarLayout.LayoutParams lp =
                     (AppBarLayout.LayoutParams) offsetChild.getLayoutParams();
             int flags = lp.getScrollFlags();
-            if ((flags & 17) == 17) {
+            if ((flags & AppBarLayout.LayoutParams.FLAG_SNAP) == AppBarLayout.LayoutParams.FLAG_SNAP) {
                 int snapTop = -offsetChild.getTop();
                 int snapBottom = -offsetChild.getBottom();
                 if (offsetChildIndex == abl.getChildCount() - 1) {
@@ -205,9 +206,9 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
                 }
 
                 int seam;
-                if (checkFlag(flags, 2)) {
+                if (checkFlag(flags, AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED)) {
                     snapBottom += ViewCompat.getMinimumHeight(offsetChild);
-                } else if (checkFlag(flags, 5)) {
+                } else if (checkFlag(flags, AppBarLayout.LayoutParams.FLAG_QUICK_RETURN)) {
                     seam = snapBottom + ViewCompat.getMinimumHeight(offsetChild);
                     if (offset < seam) {
                         snapTop = seam;
@@ -216,7 +217,7 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
                     }
                 }
 
-                if (checkFlag(flags, 32)) {
+                if (checkFlag(flags, AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP_MARGINS)) {
                     snapTop += lp.topMargin;
                     snapBottom -= lp.bottomMargin;
                 }
@@ -238,7 +239,7 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
         android.support.design.widget.CoordinatorLayout.LayoutParams lp =
                 (android.support.design.widget.CoordinatorLayout.LayoutParams) child
                         .getLayoutParams();
-        if (lp.height == -2) {
+        if (lp.height == AppBarLayout.LayoutParams.WRAP_CONTENT) {
             parent.onMeasureChild(child, parentWidthMeasureSpec, widthUsed, View.MeasureSpec
                     .makeMeasureSpec(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED), heightUsed);
             return true;
@@ -252,7 +253,7 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
         boolean handled = super.onLayoutChild(parent, abl, layoutDirection);
         int pendingAction = abl.getPendingAction();
         int offset;
-        if (this.offsetToChildIndexOnLayout >= 0 && (pendingAction & 8) == 0) {
+        if (this.offsetToChildIndexOnLayout >= 0 && (pendingAction & AppBarLayout.PENDING_ACTION_FORCE) == 0) {
             View child = abl.getChildAt(this.offsetToChildIndexOnLayout);
             offset = -child.getBottom();
             if (this.offsetToChildIndexOnLayoutIsMinHeight) {
@@ -263,16 +264,16 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
             }
 
             this.setHeaderTopBottomOffset(parent, abl, offset);
-        } else if (pendingAction != 0) {
-            boolean animate = (pendingAction & 4) != 0;
-            if ((pendingAction & 2) != 0) {
+        } else if (pendingAction != AppBarLayout.PENDING_ACTION_NONE) {
+            boolean animate = (pendingAction & AppBarLayout.PENDING_ACTION_ANIMATE_ENABLED) != 0;
+            if ((pendingAction & AppBarLayout.PENDING_ACTION_COLLAPSED) != 0) {
                 offset = -abl.getUpNestedPreScrollRange();
                 if (animate) {
                     this.animateOffsetTo(parent, abl, offset, 0.0F);
                 } else {
                     this.setHeaderTopBottomOffset(parent, abl, offset);
                 }
-            } else if ((pendingAction & 1) != 0) {
+            } else if ((pendingAction & AppBarLayout.PENDING_ACTION_EXPANDED) != 0) {
                 if (animate) {
                     this.animateOffsetTo(parent, abl, 0, 0.0F);
                 } else {
@@ -358,10 +359,10 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
                 if (interpolator != null) {
                     int childScrollableHeight = 0;
                     int flags = childLp.getScrollFlags();
-                    if ((flags & 1) != 0) {
+                    if ((flags & AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL) != 0) {
                         childScrollableHeight +=
                                 child.getHeight() + childLp.topMargin + childLp.bottomMargin;
-                        if ((flags & 2) != 0) {
+                        if ((flags & AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED) != 0) {
                             childScrollableHeight -= ViewCompat.getMinimumHeight(child);
                         }
                     }
@@ -392,11 +393,12 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
             AppBarLayout.LayoutParams childLp = (AppBarLayout.LayoutParams) child.getLayoutParams();
             int flags = childLp.getScrollFlags();
             boolean lifted = false;
-            if ((flags & 1) != 0) {
+            if ((flags & AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL) != 0) {
                 int minHeight = ViewCompat.getMinimumHeight(child);
-                if (direction > 0 && (flags & 12) != 0) {
+                if (direction > 0 && (flags & AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+                        | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED) != 0) {
                     lifted = -offset >= child.getBottom() - minHeight - layout.getTopInset();
-                } else if ((flags & 2) != 0) {
+                } else if ((flags & AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED) != 0) {
                     lifted = -offset >= child.getBottom() - minHeight - layout.getTopInset();
                 }
             }
@@ -409,7 +411,7 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
             }
 
             boolean changed = layout.setLiftedState(lifted);
-            if (Build.VERSION.SDK_INT >= 11 &&
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB &&
                     (forceJump || changed && this.shouldJumpElevationState(parent, layout))) {
                 layout.jumpDrawablesToCurrentState();
             }
