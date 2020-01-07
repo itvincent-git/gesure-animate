@@ -20,7 +20,7 @@
     app:layoutDescription="@xml/scene_wechat_like"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:minHeight="@dimen/px90dp"
+    android:minHeight="@dimen/px50dp"
     android:background="#000000"
     android:fitsSystemWindows="false"
     tools:showIn="@layout/activity_wechat_like"

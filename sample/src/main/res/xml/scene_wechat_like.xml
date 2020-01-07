@@ -58,7 +58,7 @@
             app:layout_constraintStart_toStartOf="parent">
             <CustomAttribute
                 app:attributeName="alpha"
-                app:customFloatValue="0" />
+                app:customFloatValue="1" />
         </Constraint>
         <Constraint
             android:id="@+id/background"
