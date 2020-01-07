@@ -222,8 +222,9 @@ public class WeChatBaseBehavior<T extends AppBarLayout> extends HeaderBehavior<T
                     snapBottom -= lp.bottomMargin;
                 }
 
+                //根据上下snap的距离设置松手后是往上还是往下。snapBottom是指往下到底部
                 seam = offset < (snapBottom + snapTop) / 2 ? snapBottom : snapTop;
-                this.animateOffsetTo(coordinatorLayout, abl, android.support.v4.math.MathUtils
+                this.animateOffsetTo(coordinatorLayout, abl, MathUtils
                         .clamp(seam, -abl.getTotalScrollRange(), 0), 0.0F);
             }
         }
