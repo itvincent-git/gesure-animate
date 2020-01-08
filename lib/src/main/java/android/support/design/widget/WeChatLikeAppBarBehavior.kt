@@ -20,6 +20,7 @@ class WeChatLikeAppBarBehavior @JvmOverloads constructor(
     ) {
         //处理向下滚动的逻辑
         if (dyUnconsumed < 0) {
+            //recyclerview滚到顶部fling的时候则不触发appbar的滚动
             if (topAndBottomOffset.absoluteValue != child.downNestedScrollRange.absoluteValue || type == 0) {
                 log.debug("onNestedScroll [x:%d %d] [y:%d %d] type:%d", dxConsumed, dxUnconsumed,
                     dyConsumed, dyUnconsumed, type)
