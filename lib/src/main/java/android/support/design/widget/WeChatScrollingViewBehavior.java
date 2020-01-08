@@ -12,6 +12,7 @@ import net.androidx.gestureanimate.R;
 import java.util.List;
 
 /**
+ * 从AppBarLayout.ScrollingViewBehavior抽离出来，便于自定义
  * Created by zhongyongsheng on 2020-01-06.
  */
 public class WeChatScrollingViewBehavior extends HeaderScrollingViewBehavior {

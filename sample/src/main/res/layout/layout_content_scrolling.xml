@@ -31,12 +31,17 @@
         android:text="text" />
 
 </android.support.v4.widget.NestedScrollView>-->
-<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/recycler_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     app:layout_behavior="android.support.design.widget.WeChatLikeScrollingViewBehavior"
-    tools:showIn="@layout/activity_wechat_like">
-</android.support.v7.widget.RecyclerView>
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:showIn="@layout/activity_wechat_like">
+    </android.support.v7.widget.RecyclerView>
+</LinearLayout>
