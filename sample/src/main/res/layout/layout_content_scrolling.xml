@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   Copyright (C) 2018 The Android Open Source Project
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -31,17 +30,38 @@
         android:text="text" />
 
 </android.support.v4.widget.NestedScrollView>-->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:layout_behavior="android.support.design.widget.WeChatLikeScrollingViewBehavior"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view"
+    android:layout_height="match_parent"
+    app:layout_behavior="android.support.design.widget.WeChatLikeScrollingViewBehavior">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:background="#E1A955"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                tools:showIn="@layout/activity_wechat_like" />
+        </android.support.constraint.ConstraintLayout>
+
+
+    </FrameLayout>
+
+    <View
+        android:id="@+id/fragment_cover"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:showIn="@layout/activity_wechat_like">
-    </android.support.v7.widget.RecyclerView>
-</LinearLayout>
+        android:background="#ccF6F6F9"
+        android:visibility="gone" />
+</RelativeLayout>

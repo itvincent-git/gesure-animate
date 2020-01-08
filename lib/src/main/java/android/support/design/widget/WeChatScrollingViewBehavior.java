@@ -12,7 +12,7 @@ import net.androidx.gestureanimate.R;
 import java.util.List;
 
 /**
- * 从AppBarLayout.ScrollingViewBehavior抽离出来，便于自定义
+ * 从AppBarLayout.BaseBehavior抽离出来，便于自定义
  * Created by zhongyongsheng on 2020-01-06.
  */
 public class WeChatScrollingViewBehavior extends HeaderScrollingViewBehavior {
@@ -55,7 +55,7 @@ public class WeChatScrollingViewBehavior extends HeaderScrollingViewBehavior {
         return false;
     }
 
-    private void offsetChildAsNeeded(View child, View dependency) {
+    protected void offsetChildAsNeeded(View child, View dependency) {
         android.support.design.widget.CoordinatorLayout.Behavior behavior =
                 ((android.support.design.widget.CoordinatorLayout.LayoutParams) dependency
                         .getLayoutParams()).getBehavior();

@@ -13,7 +13,7 @@ class ChangeInterceptorListener(val context: Context, val layoutParam: AppBarLay
     AppBarLayout.OnOffsetChangedListener {
     private var lastOffset = 0
     val interpolator: Interpolator =
-        DecelerateInterpolator(1.1f)
+        DecelerateInterpolator(1.5f)
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
         if (lastOffset != verticalOffset) {
@@ -21,11 +21,11 @@ class ChangeInterceptorListener(val context: Context, val layoutParam: AppBarLay
             val scrollRange = appBarLayout.totalScrollRange
             if (verticalOffset.absoluteValue == scrollRange) {
                 // appbar最小化
-                log.debug("onAppBarMinimize")
+                if (log.isDebugEnable) log.debug("onAppBarMinimize")
                 layoutParam.scrollInterpolator = interpolator
             } else if (verticalOffset.absoluteValue == 0) {
                 // appbar最大化
-                log.debug("onAppBarMaximize")
+                if (log.isDebugEnable) log.debug("onAppBarMaximize")
                 layoutParam.scrollInterpolator = null
             }
         }
