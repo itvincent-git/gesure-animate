@@ -1,10 +1,10 @@
 package android.support.design.widget
 
 import android.content.Context
-import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.view.View
 import net.slog.SLoggerFactory
+import kotlin.math.absoluteValue
 
 /**
  * 实现相似微信2楼的交互效果，这是2楼使用的AppBarLayout使用的Behavior
@@ -20,15 +20,11 @@ class WeChatLikeAppBarBehavior @JvmOverloads constructor(
     ) {
         //处理向下滚动的逻辑
         if (dyUnconsumed < 0) {
-            log.debug("onNestedScroll [x:%d %d] [y:%d %d] type:%d", dxConsumed, dxUnconsumed,
-                dyConsumed, dyUnconsumed, type)
-            if (type == 0) {
-                scroll(coordinatorLayout, child, dyUnconsumed,
-                    -child.getDownNestedScrollRange(),
-                    0)
+            if (topAndBottomOffset.absoluteValue != child.downNestedScrollRange.absoluteValue || type == 0) {
+                log.debug("onNestedScroll [x:%d %d] [y:%d %d] type:%d", dxConsumed, dxUnconsumed,
+                    dyConsumed, dyUnconsumed, type)
+                scroll(coordinatorLayout, child, dyUnconsumed, -child.getDownNestedScrollRange(), 0)
                 stopNestedScrollIfNeeded(dyUnconsumed, child, target, type)
-            } else {
-                ViewCompat.stopNestedScroll(target, 1)
             }
         }
         if (child.isLiftOnScroll()) {
