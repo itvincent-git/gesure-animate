@@ -3,9 +3,13 @@ package net.androidx.gestureanimate.sample
 import android.os.Bundle
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.ChangeInterceptorListener
+import android.support.design.widget.CoordinatorLayout
+import android.support.design.widget.WeChatLikeAppBarBehavior
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_wechat_like.app_bar
+import kotlinx.android.synthetic.main.activity_wechat_like.expand
+import kotlinx.android.synthetic.main.activity_wechat_like.shrink
 import kotlinx.android.synthetic.main.layout_content_scrolling.recycler_view
 import kotlinx.android.synthetic.main.layout_coordinator_header.motionLayout
 import net.androidx.gestureanimate.util.createRandomString
@@ -39,6 +43,18 @@ class WechatLikeActivity : AppCompatActivity() {
 
         app_bar.addOnOffsetChangedListener(
             ChangeInterceptorListener(this, headerLayoutParam))
+
+        val appbarLayoutParam = app_bar.layoutParams as CoordinatorLayout.LayoutParams
+        val appBarBehavior = appbarLayoutParam.behavior as WeChatLikeAppBarBehavior
+        expand.setOnClickListener {
+            app_bar.setExpanded(true)
+            appBarBehavior.allowScroll = true
+        }
+
+        shrink.setOnClickListener {
+            app_bar.setExpanded(false)
+            appBarBehavior.allowScroll = false
+        }
     }
 }
 

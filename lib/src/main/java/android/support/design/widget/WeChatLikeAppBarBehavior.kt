@@ -15,6 +15,15 @@ import kotlin.math.absoluteValue
 open class WeChatLikeAppBarBehavior @JvmOverloads constructor(
     context: Context? = null, attrs: AttributeSet? = null
 ) : WeChatBaseBehavior<AppBarLayout>() {
+    var allowScroll = true
+
+    override fun onStartNestedScroll(
+        parent: CoordinatorLayout, child: AppBarLayout, directTargetChild: View, target: View, nestedScrollAxes: Int,
+        type: Int
+    ): Boolean {
+        if (!allowScroll) return false
+        return super.onStartNestedScroll(parent, child, directTargetChild, target, nestedScrollAxes, type)
+    }
 
     override fun onNestedScroll(
         coordinatorLayout: CoordinatorLayout, child: AppBarLayout, target: View, dxConsumed: Int, dyConsumed: Int,

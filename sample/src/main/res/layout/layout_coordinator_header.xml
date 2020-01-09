@@ -21,7 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:minHeight="@dimen/px50dp"
-    android:background="#000000"
+    android:background="#807090"
     android:fitsSystemWindows="false"
     tools:showIn="@layout/activity_wechat_like"
     app:layout_scrollFlags="scroll|snap|exitUntilCollapsed">
