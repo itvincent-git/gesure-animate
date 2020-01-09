@@ -30,6 +30,7 @@ class WechatLikeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wechat_like)
+        app_bar.setExpanded(false)
 
         //large_tv.text = createRandomString(1024 * 8)
         recycler_view.apply {
