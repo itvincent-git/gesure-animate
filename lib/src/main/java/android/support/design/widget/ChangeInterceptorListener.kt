@@ -12,8 +12,7 @@ import kotlin.math.absoluteValue
 class ChangeInterceptorListener(val context: Context, val layoutParam: AppBarLayout.LayoutParams) :
     AppBarLayout.OnOffsetChangedListener {
     private var lastOffset = 0
-    val interpolator: Interpolator =
-        DecelerateInterpolator(1.5f)
+    val interpolator: Interpolator = DecelerateInterpolator(1.5f)
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
         if (lastOffset != verticalOffset) {
