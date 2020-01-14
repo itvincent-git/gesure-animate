@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<net.androidx.gestureanimate.CollapsibleToolbar xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.MotionalAppBarContent xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/motionLayout"
@@ -50,4 +50,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-</net.androidx.gestureanimate.CollapsibleToolbar>
+</android.support.design.widget.MotionalAppBarContent>
