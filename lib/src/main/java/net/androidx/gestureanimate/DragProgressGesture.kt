@@ -6,10 +6,12 @@ import android.support.v4.widget.ViewDragHelper
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
+import net.androidx.gestureanimate.util.ScrollConfiguration
 import net.slog.SLoggerFactory
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sign
 
 /**
  * 提供拖动手势的处理能力，支持横行/纵向的拖动
@@ -60,6 +62,7 @@ class DragProgressGesture constructor(
     private val density = context.resources.displayMetrics.density
     private var edgesTouched = 0
     private var state = DragState.Idle
+    private val scrollConfiguration = ScrollConfiguration(context)
 
     private fun getEdgesTouched(x: Int, y: Int): Int {
         var result = 0
@@ -193,17 +196,17 @@ class DragProgressGesture constructor(
                         }
                     change = callback.getCurrentProgress()
                     //按照速度计算松开后还要滑动的比例
-                    val velocityToMove = velocity / callback.getMovementDistance()
-                    if (!velocityToMove.isNaN()) {
-                        change += velocityToMove / 3f
-                    }
+                    movementDirection = callback.getMovementDistance()
+                    val totalDistance = scrollConfiguration.getSplineFlingDistance(velocity)
+                    val distance = (totalDistance * sign(velocity)).toFloat()
+                    change += (distance / movementDirection) / 3f //调整的参数，避免甩动太容易
+                    change = change.coerceIn(0f, 1f)
+
                     //百分比过半则做动画到结束，否则返回开始
-                    if (change != 0f && change != 1f) {
-                        if (change < 0.5f) {
-                            callback.onAnimateToStart()
-                        } else {
-                            callback.onAnimateToEnd()
-                        }
+                    if (change < 0.5f) {
+                        callback.onAnimateToStart()
+                    } else {
+                        callback.onAnimateToEnd()
                     }
                 }
 
@@ -292,7 +295,13 @@ interface DragEdgeCallback {
     fun onEdgeTouched(edgesTouched: Int): Boolean
 }
 
+/**
+ * 拖拉的状态
+ */
 enum class DragState { Idle, Start, Dragging }
 
+/**
+ * 滚动的方向
+ */
 enum class MovementDirection { Horizontal, Vertical }
 
