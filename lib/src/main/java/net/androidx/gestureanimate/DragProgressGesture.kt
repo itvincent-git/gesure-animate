@@ -2,7 +2,6 @@ package net.androidx.gestureanimate
 
 import android.content.Context
 import android.graphics.Rect
-import android.support.v4.widget.ViewDragHelper
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
@@ -68,13 +67,13 @@ class DragProgressGesture constructor(
         var result = 0
         if (edgeCallback != null) {
             if (x < edgeCallback.getViewRect().left + edgeSize) result =
-                result or ViewDragHelper.EDGE_LEFT
+                result or EDGE_LEFT
             if (y < edgeCallback.getViewRect().top + edgeSize) result =
-                result or ViewDragHelper.EDGE_TOP
+                result or EDGE_TOP
             if (x > edgeCallback.getViewRect().right - edgeSize) result =
-                result or ViewDragHelper.EDGE_RIGHT
+                result or EDGE_RIGHT
             if (y > edgeCallback.getViewRect().bottom - edgeSize) result =
-                result or ViewDragHelper.EDGE_BOTTOM
+                result or EDGE_BOTTOM
         }
         return result
     }
