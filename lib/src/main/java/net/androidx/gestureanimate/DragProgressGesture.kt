@@ -152,7 +152,7 @@ class DragProgressGesture constructor(
                         }
 
                     //如果拖动的速度足够或已经在拖动中
-                    if (abs(dragVelocity) > 10f || dragStarted) {
+                    if (abs(dragVelocity) > scrollConfiguration.touchSlop || dragStarted) {
                         pos = callback.getCurrentProgress()
                         if (!dragStarted) {
                             dragStarted = true

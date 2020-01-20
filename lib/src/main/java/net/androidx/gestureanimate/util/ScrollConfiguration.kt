@@ -26,11 +26,16 @@ class ScrollConfiguration(context: Context) {
     /**
      * PPI
      */
-    private val mPpi = context.resources.displayMetrics.density * 160.0f
+    val mPpi = context.resources.displayMetrics.density * 160.0f
     /**
      * 计算的减速物理系数
      */
     private val mPhysicalCoeff = computeDeceleration(0.84f)
+
+    /**
+     * 被认为是用户滚动的一个触摸距离
+     */
+    val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
 
     /**
      * fling甩动的距离
