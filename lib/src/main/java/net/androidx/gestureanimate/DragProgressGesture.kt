@@ -2,6 +2,7 @@ package net.androidx.gestureanimate
 
 import android.content.Context
 import android.graphics.Rect
+import android.util.SparseArray
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
@@ -13,7 +14,8 @@ import kotlin.math.min
 import kotlin.math.sign
 
 /**
- * 提供拖动手势的处理能力，支持横行/纵向的拖动
+ * 提供拖动手势的处理能力，支持横行/纵向的拖动。
+ * 暂不支持多点触摸划动。
  * Created by zhongyongsheng on 2019-11-20.
  */
 class DragProgressGesture constructor(
@@ -61,7 +63,9 @@ class DragProgressGesture constructor(
     private val density = context.resources.displayMetrics.density
     private var edgesTouched = 0
     private var state = DragState.Idle
-    private val scrollConfiguration = ScrollConfiguration(context)
+    private val scrollConfiguration = ScrollConfiguration(context) // 从系统及通过算法处理后的滚动参数
+    private val initialMotionX = SparseArray<Float>() //记录点击开始时的X
+    private val initialMotionY = SparseArray<Float>() //记录点击开始时的Y
 
     private fun getEdgesTouched(x: Int, y: Int): Int {
         var result = 0
@@ -78,6 +82,78 @@ class DragProgressGesture constructor(
         return result
     }
 
+    private fun resetVelocityTracker() {
+        // Return a VelocityTracker object back to be re-used by others.
+        velocityTracker?.recycle()
+        velocityTracker = null
+    }
+
+    private fun stopDrag() {
+        dragStarted = false
+        if (state != DragState.Idle) {
+            state = DragState.Idle
+            callback.onDragStateChange(DragState.Idle)
+        }
+    }
+
+    private fun startDrag() {
+        if (!dragStarted) {
+            dragStarted = true
+            if (state != DragState.Dragging) {
+                state = DragState.Dragging
+                callback.onDragStateChange(DragState.Dragging)
+            }
+        }
+    }
+
+    private fun shouldInterceptEdge(edgeCallback: DragEdgeCallback?): Boolean {
+        var shouldIntercept = false
+        edgesTouched = getEdgesTouched(lastTouchX.toInt(), lastTouchY.toInt())
+        if (edgesTouched and trackingEdges != 0 && edgeCallback != null) {
+            shouldIntercept = edgeCallback.onEdgeTouched(edgesTouched and trackingEdges)
+        }
+        return shouldIntercept
+    }
+
+    private fun resetMotion(event: MotionEvent, newPointerIndex: Int) {
+        lastTouchX = event.getX(newPointerIndex)
+        lastTouchY = event.getY(newPointerIndex)
+        activePointerId = event.getPointerId(newPointerIndex)
+
+        initialMotionX.clear()
+        initialMotionY.clear()
+    }
+
+    private fun initDragState() {
+        //stop drag
+        dragStarted = false
+
+        if (state != DragState.Start) {
+            state = DragState.Start
+            callback.onDragStateChange(DragState.Start)
+        }
+    }
+
+    private fun initMotion(event: MotionEvent) {
+        // Remember where we started (for dragging)
+        val pointerIndex = event.actionIndex
+        lastTouchX = event.getX(pointerIndex)
+        lastTouchY = event.getY(pointerIndex)
+        activePointerId = event.getPointerId(pointerIndex)
+        initialMotionX.put(activePointerId, lastTouchX)
+        initialMotionY.put(activePointerId, lastTouchY)
+    }
+
+    private fun initVelocityTracker(event: MotionEvent) {
+        // Reset the velocity tracker back to its initial state.
+        velocityTracker?.clear()
+        // If necessary retrieve a new VelocityTracker object to watch the
+        // velocity of a motion.
+        velocityTracker = velocityTracker ?: VelocityTracker.obtain()
+        // Add a user's movement to the tracker.
+        velocityTracker?.addMovement(event)
+    }
+
     //<editor-fold desc="Open API">
     var edgeSize = (EDGE_SIZE * density + 0.5f).toInt()
     var trackingEdges = 0
@@ -91,37 +167,14 @@ class DragProgressGesture constructor(
         var change = 0f
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                // Remember where we started (for dragging)
-                val pointerIndex = event.actionIndex
-                lastTouchX = event.getX(pointerIndex)
-                lastTouchY = event.getY(pointerIndex)
-                activePointerId = event.getPointerId(pointerIndex)
-                //stop drag
-                dragStarted = false
-
-                if (state != DragState.Start) {
-                    state = DragState.Start
-                    callback.onDragStateChange(DragState.Start)
-                }
-
-                var shouldIntercept = false
-                edgesTouched = getEdgesTouched(lastTouchX.toInt(), lastTouchY.toInt())
-                if (edgesTouched and trackingEdges != 0 && edgeCallback != null) {
-                    shouldIntercept = edgeCallback.onEdgeTouched(edgesTouched and trackingEdges)
-                }
-
-                // Reset the velocity tracker back to its initial state.
-                velocityTracker?.clear()
-                // If necessary retrieve a new VelocityTracker object to watch the
-                // velocity of a motion.
-                velocityTracker = velocityTracker ?: VelocityTracker.obtain()
-                // Add a user's movement to the tracker.
-                velocityTracker?.addMovement(event)
-
+                initMotion(event)
+                initDragState()
+                var shouldIntercept = shouldInterceptEdge(edgeCallback)
+                initVelocityTracker(event)
                 return shouldIntercept
             }
             MotionEvent.ACTION_MOVE -> {
-                // Find the index of the active pointer and fetch its position
+                // 移动的距离
                 val (x: Float, y: Float) =
                     event.findPointerIndex(activePointerId).let { pointerIndex ->
                         // Calculate the distance moved
@@ -129,47 +182,39 @@ class DragProgressGesture constructor(
                             event.getY(pointerIndex)
                     }
 
-                val scrollX = x - lastTouchX
-                val scrollY = y - lastTouchY
-
                 velocityTracker?.apply {
-                    val pointerId = event.getPointerId(event.actionIndex)
+                    //从开始触摸到现在总移动距离
+                    val dx = x - initialMotionX[activePointerId]
+                    val dy = y - initialMotionY[activePointerId]
                     addMovement(event)
                     // When you want to determine the velocity, call
                     // computeCurrentVelocity(). Then call getXVelocity()
                     // and getYVelocity() to retrieve the velocity for each pointer ID.
                     computeCurrentVelocity(1000, maximumFlingVelocity)
-                    // Log velocity of pixels per second
-                    // Best practice to use VelocityTrackerCompat where possible.
-                    val xVelocity = getXVelocity(pointerId)
-                    val yVelocity = getYVelocity(pointerId)
 
-                    val dragVelocity =
+                    val dragDistance =
                         if (callback.getMovementDirection() == MovementDirection.Horizontal) {
-                            xVelocity
+                            dx
                         } else {
-                            yVelocity
+                            dy
                         }
+                    //log.debug("dragDistance $dragDistance (${scrollConfiguration.touchSlop})")
 
                     //如果拖动的速度足够或已经在拖动中
-                    if (abs(dragVelocity) > scrollConfiguration.touchSlop || dragStarted) {
+                    if (abs(dragDistance) > scrollConfiguration.touchSlop || dragStarted) {
                         pos = callback.getCurrentProgress()
-                        if (!dragStarted) {
-                            dragStarted = true
-                            if (state != DragState.Dragging) {
-                                state = DragState.Dragging
-                                callback.onDragStateChange(DragState.Dragging)
-                            }
-                        }
+                        startDrag()
 
+                        val scrollX = x - lastTouchX
+                        val scrollY = y - lastTouchY
                         movementDirection = callback.getMovementDistance()
                         //根据方向计算拖动的比例
-                        change =
-                            if (callback.getMovementDirection() == MovementDirection.Horizontal) {
-                                scrollX / movementDirection
-                            } else {
-                                scrollY / movementDirection
-                            }
+                        change = if (callback.getMovementDirection() == MovementDirection.Horizontal) {
+                            scrollX / movementDirection
+                        } else {
+                            scrollY / movementDirection
+                        }
+
                         //加入到当前的比例中
                         pos = max(min(pos + change, 1.0f), 0.0f)
                         callback.onProgressChange(pos)
@@ -185,7 +230,7 @@ class DragProgressGesture constructor(
                 velocityTracker?.apply {
                     //计算速度
                     computeCurrentVelocity(1000, maximumFlingVelocity)
-                    val pointerId = event.getPointerId(event.actionIndex)
+                    val pointerId = event.getPointerId(activePointerId)
                     //根据方向取速度
                     val velocity =
                         if (callback.getMovementDirection() == MovementDirection.Horizontal) {
@@ -210,14 +255,8 @@ class DragProgressGesture constructor(
                 }
 
                 activePointerId = MotionEvent.INVALID_POINTER_ID
-                // Return a VelocityTracker object back to be re-used by others.
-                velocityTracker?.recycle()
-                velocityTracker = null
-                dragStarted = false
-                if (state != DragState.Idle) {
-                    state = DragState.Idle
-                    callback.onDragStateChange(DragState.Idle)
-                }
+                resetVelocityTracker()
+                stopDrag()
             }
             MotionEvent.ACTION_POINTER_UP -> {
 
@@ -228,9 +267,7 @@ class DragProgressGesture constructor(
                             // This was our active pointer going up. Choose a new
                             // active pointer and adjust accordingly.
                             val newPointerIndex = if (pointerIndex == 0) 1 else 0
-                            lastTouchX = event.getX(newPointerIndex)
-                            lastTouchY = event.getY(newPointerIndex)
-                            activePointerId = event.getPointerId(newPointerIndex)
+                            resetMotion(event, newPointerIndex)
                         }
                 }
             }
@@ -240,6 +277,9 @@ class DragProgressGesture constructor(
     //</editor-fold>
 }
 
+/**
+ * 拖动的回调
+ */
 interface DragProgressCallback {
 
     fun onDragStateChange(state: DragState)

@@ -33,7 +33,7 @@ class ScrollConfiguration(context: Context) {
     private val mPhysicalCoeff = computeDeceleration(0.84f)
 
     /**
-     * 被认为是用户滚动的一个触摸距离
+     * 认为用户的操作是一个滚动的最小距离（超过这种距离才被认为是滚动）
      */
     val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
 

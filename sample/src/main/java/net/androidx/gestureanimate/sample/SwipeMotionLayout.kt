@@ -51,7 +51,7 @@ class SwipeMotionLayout @JvmOverloads constructor(
         }
 
         override fun onProgressChange(value: Float) {
-            log.debug("onProgressChange $progress")
+            //log.debug("onProgressChange $progress")
             if (!isOnTouchLeft) {
                 progress = value
             }
