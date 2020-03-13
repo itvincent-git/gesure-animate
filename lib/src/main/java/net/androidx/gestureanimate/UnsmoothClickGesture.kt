@@ -32,17 +32,22 @@ class UnsmoothClickGesture constructor(
         lastTouchX = event.getX(pointerIndex)
         lastTouchY = event.getY(pointerIndex)
         activePointerId = event.getPointerId(pointerIndex)
+        initialMotionX.clear()
+        initialMotionY.clear()
         initialMotionX.put(activePointerId, lastTouchX)
         initialMotionY.put(activePointerId, lastTouchY)
     }
 
-    private fun resetMotion(event: MotionEvent, newPointerIndex: Int) {
+    private fun resetNewPointer(event: MotionEvent, newPointerIndex: Int) {
         lastTouchX = event.getX(newPointerIndex)
         lastTouchY = event.getY(newPointerIndex)
         activePointerId = event.getPointerId(newPointerIndex)
 
         initialMotionX.clear()
         initialMotionY.clear()
+        //已经换了另外一个触摸点后，需要重新初始化当前的激活的点
+        initialMotionX.put(activePointerId, lastTouchX)
+        initialMotionY.put(activePointerId, lastTouchY)
     }
 
     /**
@@ -82,7 +87,7 @@ class UnsmoothClickGesture constructor(
                             // This was our active pointer going up. Choose a new
                             // active pointer and adjust accordingly.
                             val newPointerIndex = if (pointerIndex == 0) 1 else 0
-                            resetMotion(event, newPointerIndex)
+                            resetNewPointer(event, newPointerIndex)
                         }
                 }
             }
