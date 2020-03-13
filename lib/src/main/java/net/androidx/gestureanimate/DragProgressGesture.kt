@@ -64,8 +64,8 @@ class DragProgressGesture constructor(
     private var edgesTouched = 0
     private var state = DragState.Idle
     private val scrollConfiguration = ScrollConfiguration(context) // 从系统及通过算法处理后的滚动参数
-    private val initialMotionX = SparseArray<Float>() //记录点击开始时的X
-    private val initialMotionY = SparseArray<Float>() //记录点击开始时的Y
+    private val initialMotionX = SparseArray<Float>() //记录点击开始时的X, Key为pointId
+    private val initialMotionY = SparseArray<Float>() //记录点击开始时的Y, Key为pointId
 
     private fun getEdgesTouched(x: Int, y: Int): Int {
         var result = 0
@@ -115,13 +115,16 @@ class DragProgressGesture constructor(
         return shouldIntercept
     }
 
-    private fun resetMotion(event: MotionEvent, newPointerIndex: Int) {
+    private fun resetNewPointer(event: MotionEvent, newPointerIndex: Int) {
         lastTouchX = event.getX(newPointerIndex)
         lastTouchY = event.getY(newPointerIndex)
         activePointerId = event.getPointerId(newPointerIndex)
 
         initialMotionX.clear()
         initialMotionY.clear()
+        //已经换了另外一个触摸点后，需要重新初始化当前的激活的点
+        initialMotionX.put(activePointerId, lastTouchX)
+        initialMotionY.put(activePointerId, lastTouchY)
     }
 
     private fun initDragState() {
@@ -140,6 +143,8 @@ class DragProgressGesture constructor(
         lastTouchX = event.getX(pointerIndex)
         lastTouchY = event.getY(pointerIndex)
         activePointerId = event.getPointerId(pointerIndex)
+        initialMotionX.clear()
+        initialMotionY.clear()
         initialMotionX.put(activePointerId, lastTouchX)
         initialMotionY.put(activePointerId, lastTouchY)
     }
@@ -230,13 +235,12 @@ class DragProgressGesture constructor(
                 velocityTracker?.apply {
                     //计算速度
                     computeCurrentVelocity(1000, maximumFlingVelocity)
-                    val pointerId = event.getPointerId(activePointerId)
                     //根据方向取速度
                     val velocity =
                         if (callback.getMovementDirection() == MovementDirection.Horizontal) {
-                            getXVelocity(pointerId)
+                            getXVelocity(activePointerId)
                         } else {
-                            getYVelocity(pointerId)
+                            getYVelocity(activePointerId)
                         }
                     change = callback.getCurrentProgress()
                     //按照速度计算松开后还要滑动的比例
@@ -267,7 +271,7 @@ class DragProgressGesture constructor(
                             // This was our active pointer going up. Choose a new
                             // active pointer and adjust accordingly.
                             val newPointerIndex = if (pointerIndex == 0) 1 else 0
-                            resetMotion(event, newPointerIndex)
+                            resetNewPointer(event, newPointerIndex)
                         }
                 }
             }
