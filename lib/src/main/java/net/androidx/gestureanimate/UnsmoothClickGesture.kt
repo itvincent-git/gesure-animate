@@ -54,7 +54,7 @@ class UnsmoothClickGesture constructor(
      * 调用点击事件的处理逻辑
      */
     fun onTouchEvent(event: MotionEvent): Boolean {
-        //log.debug("onTouchEvent $event")
+        log.info("onTouchEvent $event")
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 initMotion(event)
@@ -77,6 +77,7 @@ class UnsmoothClickGesture constructor(
                 if (checkSlop) {
                     callback.onUnsmoothClick(event)
                 }
+                activePointerId = MotionEvent.INVALID_POINTER_ID
             }
             MotionEvent.ACTION_POINTER_UP -> {
 
