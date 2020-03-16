@@ -59,14 +59,13 @@ class UnsmoothClickGesture constructor(
             MotionEvent.ACTION_DOWN -> {
                 initMotion(event)
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> run {
+                val pointerIndex = event.findPointerIndex(activePointerId)
+                if (pointerIndex == -1) {
+                    return@run
+                }
                 // 移动的距离
-                val (x: Float, y: Float) =
-                    event.findPointerIndex(activePointerId).let { pointerIndex ->
-                        // Calculate the distance moved
-                        event.getX(pointerIndex) to
-                            event.getY(pointerIndex)
-                    }
+                val (x: Float, y: Float) = event.getX(pointerIndex) to event.getY(pointerIndex)
 
                 //从开始触摸到现在总移动距离
                 val dx = x - initialMotionX[activePointerId]
